@@ -1,0 +1,20 @@
+Language: Cpp
+BasedOnStyle: Chromium
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+BinPackParameters: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+CommentPragmas: '.\/[\*(\/\/)]+(.+\n.+)+\*\/'
+ColumnLimit: 0
+StatementMacros: ["PATCH", "CHECK"]
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveMacros: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AlignOperands: true
+SpaceAfterCStyleCast: true
+SortIncludes: false

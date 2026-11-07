@@ -1,0 +1,20 @@
+# Build & temp files
+build/
+bin/
+*.obj
+*.o
+*.exp
+*.lib
+*.pdb
+*.tmp
+*.log
+__pycache__/
+.pytest_cache/
+
+# Large submodule caches and backups
+backup_pre_final_audit/
+original_baseline_dist/
+**/vcpkg/
+**/.git/
+*.pack
+*.idx

@@ -1,0 +1,344 @@
+#pragma pack(push, 1)
+typedef enum {
+    ErfTag_Nil,
+    ErfTag_Bool,
+    ErfTag_Int32,
+    ErfTag_Int64,
+    ErfTag_Uint64,
+    ErfTag_Float64,
+    ErfTag_Str,
+    ErfTag_Arr,
+    ErfTag_Map,
+} ErfTag;
+
+typedef union {
+    u64 u;
+    i64 i;
+} FlakeId;
+static_assert(sizeof(FlakeId) == 0x8);
+
+typedef enum {
+    DisChannelType_Unknown,
+    DisChannelType_GuildText,
+    DisChannelType_GuildVoice,
+    DisChannelType_GuildCategory,
+    DisChannelType_PrivatePair,
+    DisChannelType_PrivateGroup,
+
+    DisChannelType_GuildVoiceStage = 13,
+} DisChannelType;
+
+typedef struct {
+    const char* data;
+    i32         length;
+    Pad(4);
+} ErfStr;
+static_assert(sizeof(ErfStr) == 0x10);
+
+typedef struct {
+    void* addr;
+    i32   count;
+    Pad(4);
+} ErfMap;
+static_assert(sizeof(ErfMap) == 0x10);
+
+typedef struct {
+    void* addr;
+    i32   count;
+    Pad(4);
+} ErfArr;
+static_assert(sizeof(ErfArr) == 0x10);
+
+typedef struct {
+    void* sqlite3_stmt;
+} RipStmt;
+static_assert(sizeof(RipStmt) == 0x8);
+
+typedef struct {
+    ErfTag tag;
+    Pad(4);
+    union {
+        u8     boolean;
+        i32    int32;
+        i64    int64;
+        u64    uint64;
+        f64    float64;
+        ErfStr str;
+        ErfArr arr;
+        ErfMap map;
+    };
+} ErfMapAny;
+static_assert(sizeof(ErfMapAny) == 0x18);
+
+typedef struct
+{
+    i32 txCount;
+    Pad(4);
+    RipStmt stmt_beginTx;
+    RipStmt stmt_endTx;
+    RipStmt replaceIntoGuild;
+    RipStmt replaceIntoGuildChannel;
+    RipStmt replaceIntoGuildVoiceChannel;
+    RipStmt replaceIntoGuildChannelCategory;
+    RipStmt replaceIntoGuildMember;
+    RipStmt replaceIntoGuildMemberRole;
+    RipStmt deleteFromGuildMemberRole_UserId_GuildId;
+    RipStmt deleteFromGuildMember_UserId_GuildId;
+    RipStmt replaceIntoGuildBan_GuildId_UserId;
+    RipStmt deleteFromGuildBan_GuildId_UserId;
+    RipStmt replaceIntoRole;
+    RipStmt deleteFromRole;
+    RipStmt deleteGuildChannelPermQ;
+    RipStmt replaceIntoGuildChannelPermQ;
+    RipStmt replaceIntoMessage;
+    RipStmt insertOrIgnoreIntoQuotedMessage;
+    RipStmt replaceIntoEmoji;
+    RipStmt replaceIntoEmojiRole;
+    RipStmt replaceIntoEmojiGuild;
+    RipStmt deleteEmojiInGuildQ;
+    RipStmt ensureUserExistsQ;
+    RipStmt deleteMessageEmbedsQ;
+    RipStmt replaceIntoUserChannelReadState;
+    RipStmt replaceIntoUserChannelReadStateKeepMentions;
+    RipStmt replaceIntoAnyChannelType;
+    RipStmt updateUserStatus;
+    RipStmt updateUserStatusWithGame;
+    RipStmt insertOrReplaceIntoVoiceState;
+    RipStmt deleteFromVoiceState_SessionId;
+    RipStmt selectUserHashSum;
+    RipStmt replaceIntoUser;
+    RipStmt updateUser;
+    RipStmt replaceIntoGuildMemberForChannel;
+    RipStmt updatePrivateChannelLastMessageId;
+    RipStmt updateGuildChannelLastMessageId;
+    RipStmt addEmojiReactionQ;
+    RipStmt addEmojiReactionCountQ;
+    RipStmt removeEmojiReactionQ;
+    RipStmt removeEmojiReactionCountQ;
+    RipStmt deleteFromMessageEmojiReaction;
+    RipStmt deleteFromMessageEmojiReactionCount;
+    RipStmt replaceIntoChannelPinnedMessage;
+    RipStmt deleteFromChannelPinnedMessage;
+    RipStmt selectAuthorFromMessage;
+    RipStmt replaceIntoPrivateChan_ChanId;
+    RipStmt replaceIntoPrivateChanParticipant_ChanId_UserId;
+    RipStmt updatePrivChan_Name_OwnerId_Icon_Id;
+    RipStmt insertOrReplaceIntoUserRelationship_OwnUserId_OtherUserId_Type;
+    RipStmt clearImageAttachsQ;
+    RipStmt clearFileAttachsQ;
+    RipStmt addImageAttachQ;
+    RipStmt addFileAttachQ;
+    RipStmt insertImageEmbedQ;
+    RipStmt insertRichEmbedQ;
+    RipStmt updateMessageSetDeleted_MsgId_ChanId;
+    RipStmt replaceIntoFetchMarker;
+    RipStmt selectMsgIdFromFetchMarker;
+    void*   db;
+    void*   jsbuffer;
+} DisDbPrepared;
+static_assert(sizeof(DisDbPrepared) == 0x1F0);
+
+//~ Voice
+
+typedef struct {
+    QString plain;
+    QString xsalsa20_poly1305;
+    QString xsalsa20_poly1305_suffix;
+} VoiceEncStrings;
+static_assert(sizeof(VoiceEncStrings) == (sizeof(QString) * 3));
+
+typedef enum {
+    VoiceEncMode_XChaCha20_Poly1305_RtpSize = 0x2,
+    VoiceEncMode_XSalsa20_Poly1305_Suffix   = 0x3,
+} VoiceEncMode;
+
+typedef struct
+{
+    // NOTE(geni): I can't be bothered to define std::vector and VoiceDatagram... just look at the linux branch if you care
+    u8 datagrams[24];
+
+    u8* contentsData;
+    u64 contentsCap;
+    u64 contentsPos;
+} VoiceDatasAccum;
+static_assert(sizeof(VoiceDatasAccum) == 0x30);
+
+typedef struct {
+    u8      _unk[0x10];
+    u8      parentVoiceLine[0x10];
+    void*   webSocket;
+    void*   heartbeatTimer;
+    u64     connUserId;
+    u64     connGuildId;
+    u64     connChannelId;
+    QString connSessionId;
+    QString connToken;
+    QString connEndpoint;
+    void*   udpSocket;
+    void*   emptyVoicePacketsTimer;
+    u16     emptyVoicePacketsSent;
+    Pad(6);
+    u8*             packetBuffer;
+    u64             packetBufferSize;
+    u8*             sendPacketBuffer;
+    u64             sendPacketBufferSize;
+    VoiceDatasAccum voiceDatasAccum;
+    u32             ssrc;
+    u16             serverPort;
+    Pad(2);
+    QString serverAddress;
+    u8      serverModes[8];
+    u32     encMode;
+
+    // NOTE(geni): Stealing padding for nonce :^)
+    u32 COMMUNITY_FIX_nonce;
+
+    u8*     secretKey;
+    QString discoveredAddress;
+    u16     discoveredPort;
+    u16     sequence;
+    Pad(4);
+} DisVLWorker;
+static_assert(sizeof(DisVLWorker) == 0x100);
+
+typedef struct {
+    void*        networkThread;
+    DisVLWorker* vlWorker;
+
+    // NOTE(geni): Actually an atomic variable :troll:
+    void*            voiceSinksMutex;
+    QTypedArrayData* voiceSinks;
+    u32              stateType;
+    Pad(4);
+    u64     userId;
+    u64     guildId;
+    u64     channelId;
+    QString sessionId;
+    QString token;
+    QString endpoint;
+} DisVoiceLinePriv;
+static_assert(sizeof(DisVoiceLinePriv) == 0x58);
+
+typedef struct {
+    Pad(0x10);
+    DisVoiceLinePriv* priv;
+} DisVoiceLine;
+static_assert(sizeof(DisVoiceLine) == 0x18);
+
+typedef struct {
+    void* opusEncoder;
+    f32*  audioBuffer;
+    u64   audioBufferContentSize;
+    u64   audioBufferCapacity;
+    u32   timestamp;
+    u32   silentPackets;
+} DisVoiceEncode_EncodingContext;
+static_assert(sizeof(DisVoiceEncode_EncodingContext) == 0x28);
+
+enum {
+    VOICE_OP_IDENTIFY             = 0,
+    VOICE_OP_READY                = 2,
+    VOICE_OP_SESSION_DESCRIPTION  = 4,
+    VOICE_OP_SPEAKING             = 5,
+    VOICE_OP_HEARTBEAT_ACK        = 6,
+    VOICE_OP_HELLO                = 8,
+    VOICE_OP_CLIENTS_CONNECT      = 11,
+    VOICE_OP_CLIENT_DISCONNECT    = 13,
+    VOICE_OP_PREPARE_TRANSITION   = 21,
+    VOICE_OP_EXECUTE_TRANSITION   = 22,
+    VOICE_OP_READY_FOR_TRANSITION = 23,
+    VOICE_OP_PREPARE_EPOCH        = 24,
+    RTP_PACKET_TYPE_VOICE         = 0x78,
+};
+
+enum {
+    // NOTE(geni): 'h' (SMALL_TUPLE_EXT)
+    DedETFTerm_SmallTuple = 104,
+};
+
+//~ Dread/ETF
+
+typedef u32 DedEventType;
+enum {
+    DedEventType_Nil,
+    DedEventType_Uint8,
+    DedEventType_Int32,
+    DedEventType_Int64,
+    DedEventType_Uint64,
+    DedEventType_Float64,
+    DedEventType_Atom,
+    DedEventType_Binary,
+    DedEventType_ListStart,
+    DedEventType_ListEnd,
+    DedEventType_MapStart,
+    DedEventType_MapEnd,
+};
+static_assert(sizeof(DedEventType) == 4);
+
+typedef u8 DedResultType;
+enum {
+    DedResultType_Event,
+    DedResultType_Error,
+};
+static_assert(sizeof(DedResultType) == 1);
+
+typedef u8 DedErrorType;
+enum {
+    DedErrorType_EndedUnexpectedly,
+    DedErrorType_UnknownTermType,
+    DedErrorType_ValueOutOfRange,
+    DedErrorType_ExceededSizeLimit,
+};
+static_assert(sizeof(DedErrorType) == 1);
+
+// NOTE(geni): String8 matches with Ripcord's Ded::Bytes lmao
+typedef String8 DedBytes;
+static_assert(sizeof(DedBytes) == 0x10);
+
+typedef struct {
+    DedEventType type;
+    Pad(4);
+    union {
+        u8      uint8;
+        i32     int32;
+        i64     int64;
+        u64     uint64;
+        f64     float64;
+        String8 atom;
+        String8 binary;
+        u64     listStart;
+        u64     mapStart;
+    };
+} DedEvent;
+static_assert(sizeof(DedEvent) == 0x18);
+
+typedef struct {
+    DedErrorType type;
+    u8           unknownTerm;
+} DedError;
+static_assert(sizeof(DedError) == 2);
+
+// NOTE(geni): LSB is type, rest is count
+typedef u32 DedFrame;
+static_assert(sizeof(DedFrame) == 4);
+
+typedef struct {
+    DedResultType type;
+    Pad(7);
+    union {
+        DedEvent event;
+        DedError error;
+    };
+} DedResult;
+static_assert(sizeof(DedResult) == 0x20);
+
+typedef struct {
+    DedFrame frames[255];
+    Pad(4);
+    u8* data;
+    u64 length;
+    u64 index;
+} DedState;
+static_assert(sizeof(DedState) == 0x418);
+
+#pragma pack(pop)

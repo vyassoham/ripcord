@@ -1,0 +1,6 @@
+PATCH(deleted_message_space, 0x3E0FF1, Array(0x00), Array(0x20))
+PATCH(deleted_message_space_length, 0x179B4B, Array(0x07), Array(0x08))
+PATCH(deleted_message_append, 0x179B79, Array(0xE9, 0xD6), Array(0xEB, 0x4C))
+PATCH(deleted_message_details, 0xEA8AC, Array(0x74), Array(0xEB))
+PATCH(cooldown, 0x1532BB, Array(0x74), Array(0xEB))
+PATCH(preferences_dialog_show, 0x80C54, Array(0xF0), Array(0xF8))
